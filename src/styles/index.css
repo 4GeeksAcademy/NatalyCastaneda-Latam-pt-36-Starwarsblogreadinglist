@@ -1,3 +1,30 @@
 /* 
     General Styles
 */
+body {
+    margin: 0;
+    background-image: url('https://i.giphy.com/aRZ4vTsHnyW6A.webp'); 
+    background-size: cover; 
+    background-repeat: repeat; 
+    background-position: center; 
+    height: 100vh; 
+    padding: 0px 90px 0px 90px;
+}
+.navbar img {
+    width: 150px;
+    margin-left: 15px;
+}
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn.clicked {
+    background-color: gold;
+    color: white;
+    transform: scale(1.1);
+}
+
+.btn.clicked:hover {
+    background-color: orange;
+    transform: scale(1.2);
+}

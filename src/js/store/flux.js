@@ -1,45 +1,100 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			demo: [
-				{
-					title: "FIRST",
-					background: "white",
-					initial: "white"
-				},
-				{
-					title: "SECOND",
-					background: "white",
-					initial: "white"
-				}
-			]
+			people: [],
+			planets: [],
+			vehicles: [],
+			favorites: []
 		},
 		actions: {
-			// Use getActions to call a function within a fuction
-			exampleFunction: () => {
-				getActions().changeColor(0, "green");
+			getPeople: () => {
+				fetch("https://www.swapi.tech/api/people/")
+					.then((res) => res.json())
+					.then((data) => {
+						if (!Array.isArray(data.results)) throw new Error("Invalid response format");
+
+						return Promise.all(
+							data.results.map((character) =>
+								fetch(`https://www.swapi.tech/api/people/${character.uid}`)
+									.then((res) => res.json())
+									.then((characterData) => characterData.result)
+									.catch((err) => {
+										console.error(`Error fetching character ${character.uid}`, err);
+										return null;
+									})
+							)
+						);
+					})
+					.then((completeCharacters) => {
+						const filteredCharacters = completeCharacters.filter((char) => char !== null);
+						setStore({ people: filteredCharacters });
+					})
+					.catch((err) => console.error("Could not load characters", err));
 			},
-			loadSomeData: () => {
-				/**
-					fetch().then().then(data => setStore({ "foo": data.bar }))
-				*/
+			getPlanets: () => {
+				fetch("https://www.swapi.tech/api/planets/")
+					.then((res) => res.json())
+					.then((data) => {
+						if (!Array.isArray(data.results)) throw new Error("Invalid response format");
+
+						return Promise.all(
+							data.results.map((planets) =>
+								fetch(`https://www.swapi.tech/api/planets/${planets.uid}`)
+									.then((res) => res.json())
+									.then((planetsData) => planetsData.result)
+									.catch((err) => {
+										console.error(`Error fetching planets ${planets.uid}`, err);
+										return null;
+									})
+							)
+						);
+					})
+					.then((completePlanets) => {
+						const filteredPlanets = completePlanets.filter((char) => char !== null);
+						setStore({ planets: filteredPlanets });
+					})
+					.catch((err) => console.error("Could not load planets", err));
 			},
-			changeColor: (index, color) => {
-				//get the store
+			getVehicles: () => {
+				fetch("https://www.swapi.tech/api/vehicles/")
+					.then((res) => res.json())
+					.then((data) => {
+						if (!Array.isArray(data.results)) throw new Error("Invalid response format");
+
+						return Promise.all(
+							data.results.map((vehicles) =>
+								fetch(`https://www.swapi.tech/api/vehicles/${vehicles.uid}`)
+									.then((res) => res.json())
+									.then((vehiclesData) => vehiclesData.result)
+									.catch((err) => {
+										console.error(`Error fetching vehicles ${vehicles.uid}`, err);
+										return null;
+									})
+							)
+						);
+					})
+					.then((completeVehicles) => {
+						const filteredVehicles = completeVehicles.filter((char) => char !== null);
+						setStore({ vehicles: filteredVehicles });
+					})
+					.catch((err) => console.error("Could not load vehicles", err));
+			},
+			addFavorite: (item, category, uid) => {
 				const store = getStore();
-
-				//we have to loop the entire demo array to look for the respective index
-				//and change its color
-				const demo = store.demo.map((elm, i) => {
-					if (i === index) elm.background = color;
-					return elm;
+				if (!store.favorites.some((fav) => fav.name === item)) {
+					setStore({
+						favorites: [...store.favorites, { name: item, category, uid }]
+					});
+				}
+			},
+			removeFavorite: (itemName) => {
+				const store = getStore();
+				setStore({
+					favorites: store.favorites.filter(fav => fav.name !== itemName),
 				});
-
-				//reset the global store
-				setStore({ demo: demo });
-			}
-		}
+			},
+		},
 	};
-};
+}
 
 export default getState;
